@@ -1,12 +1,11 @@
 import PubSub from "./pubsub.js";
-import RedisRepo from "./redis.repo.js";
-const redisRepo = new RedisRepo();
+import redisRepo from "./redis.repo.js";
+//const redisRepo = new RedisRepo();
 
 export default function RedisExpiredEvents() {
-    //PubSub.subscribe("__keyevent@0__:expired");
-    //PubSub.subscribe("__keyevent@0__:set");
+    PubSub.subscribe("__keyevent@0__:expired");
     PubSub.subscribe("__keyspace@0__:set");
-    //PubSub.subscribe("__keyevent@0__:del");
+    // PubSub.subscribe("__keyevent@0__:del");
     
     PubSub.on("message", async (channel, message) => {
         const [type, key] = message.split(":");
@@ -17,7 +16,13 @@ export default function RedisExpiredEvents() {
                 console.log("KEY: ", key);
                 console.log("VALUE: ", value);
             
-                break;
+                break; 
+            }
+            default: { // for test
+                const value = await redisRepo.hvals(type);
+                console.log("TYPE: ", type);
+                //console.log("KEY: ", key);
+                console.log("VALUE: ", value);
             }
         }
     });

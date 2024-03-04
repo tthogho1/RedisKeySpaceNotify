@@ -4,7 +4,7 @@ const host = "localhost";
 const port = 6379;
 const db = 0;
 
-export default class RedisRepo {
+class RedisRepo {
     
     constructor() {
         this.redis = new Redis({ port, host, db });
@@ -15,6 +15,49 @@ export default class RedisRepo {
     get(key) {
         return this.redis.get(key);
     }
+
+    hvals(key) {
+        return this.redis.hvals(key);
+    }
+
+    getKeys = () => {
+        return new Promise((resolve, reject) => {
+            this.redis.keys('*', (err, keys) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+        
+                resolve(keys);
+            });
+        });
+    };
+
+    getValues = keys => {
+        return Promise.all(keys.map(key => {
+
+            this.hvals(key)
+        }));
+    };
+
+    getAll = async () => {
+        const keys = await this.getKeys();
+        const values = await this.getValues(keys);
+
+        return keys.map((key, index) => ({
+            key,
+            value: values[index],
+        }));
+    };
+
+    setExpire(key, value, expire) {
+        return this.redis
+            .multi()
+            .hset(key, value)
+            .expire(key, expire)
+            .exec();
+    }
+    
     setReminder(key, value, expire) {
         this.redis
         .multi()
@@ -24,3 +67,6 @@ export default class RedisRepo {
         .exec();
     }
 }
+
+const redisRepo = new RedisRepo();
+export default redisRepo;

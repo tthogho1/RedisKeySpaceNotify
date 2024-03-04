@@ -1,0 +1,12 @@
+<html>
+    <body>
+        <button id="btn" onclick="createData();">TEST BUTTON</button>
+        <script>
+            function  createData() {
+                fetch('/create', {
+                    method: 'POST',
+                })
+            }
+        </script>
+    </body>
+</html>
